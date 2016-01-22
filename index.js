@@ -1,22 +1,16 @@
 'use strict';
 
-const querystring = require('querystring');
+var querystring = require('querystring');
 
 var responseHeaders;
 
 module.exports = function (port, https) {
 
-    const http = https ? require('https') : require('http');
+    var http = https ? require('https') : require('http');
 
     return function (event, context) {
 
-        console.log(event);
-
         if (!responseHeaders) responseHeaders = event.responseHeaders;
-        
-        event.path = gatewayToObject(event.path);
-        event.query = gatewayToObject(event.query);
-        event.headers = gatewayToObject(event.headers);
 
         var parts = [];
         for (var p = 0; 'p' + p.toString() in event.path; p++) {
@@ -69,8 +63,6 @@ module.exports = function (port, https) {
 
 function createError(statusCode, body, headers) {
 
-    body = new Buffer(body).toString('base64');
-
     if (headers === undefined) headers = {
         "content-length": body.length.toString(),
         "content-type": "application/json; charset=utf-8",
@@ -78,29 +70,12 @@ function createError(statusCode, body, headers) {
         "date": Date.now().toString()
     };
 
-    var error = new Error(statusCode.toString());
+    var error = new Error(statusCode.toString() + body);
 
     var values = responseHeaders.map(function (header) {
         return headers[header] || '';
     });
-    error.stack = 'Error\n' + body + '\n' + values.join('\n');
+    error.stack = '\n' + values.join('\n');
 
     return error;
-}
-
-function gatewayToObject (string) {
-
-    var result = {};
-    var string = string.slice(1,-1);
-
-    if (string) {
-        var parts = string.split(', ');
-        console.log(parts);
-        for (var i = 0; i < parts.length; i++) {
-            var kv = parts[i].split('=');
-            result[kv[0]] = kv[1];
-        }
-    }
-
-    return result;
 }

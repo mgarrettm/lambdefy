@@ -4,11 +4,26 @@ var querystring = require('querystring');
 
 var responseHeaders;
 
-module.exports = function (port, https) {
+module.exports = function (port, options) {
 
-    var http = https ? require('https') : require('http');
+    if (!options) options = {};
+
+    var http = options.https ? require('https') : require('http');
+    var async_event = null;
+    var async_context = null;
 
     return function (event, context) {
+
+        if (options.async) {
+            if (event) {
+                async_event = event;
+                async_context = context;
+                return;
+            } else {
+                event = async_event;
+                context = async_context;
+            }
+        }
 
         if (!responseHeaders) responseHeaders = event.responseHeaders;
 

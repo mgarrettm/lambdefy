@@ -9,12 +9,14 @@ module.exports = function (port, options) {
     if (!options) options = {};
 
     var http = options.https ? require('https') : require('http');
+    var async = options.async;
+
     var async_event = null;
     var async_context = null;
 
     return function (event, context) {
-
-        if (options.async) {
+        
+        if (async) {
             if (event) {
                 async_event = event;
                 async_context = context;

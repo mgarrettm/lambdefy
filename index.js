@@ -21,9 +21,11 @@ module.exports = function (port, options) {
                 async_event = event;
                 async_context = context;
                 return;
-            } else {
+            } else if (async_event) {
                 event = async_event;
                 context = async_context;
+            } else {
+                return;
             }
         }
 
@@ -86,6 +88,8 @@ function createError(statusCode, body, headers) {
         "connection": "keep-alive",
         "date": Date.now().toString()
     };
+
+    body = new Buffer(body).toString('base64');
 
     var error = new Error(statusCode.toString() + body);
 
